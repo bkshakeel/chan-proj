@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block   content %}
+<h2>Register</h2>
+<form action="/accounts/register/" method="post">{% csrf_token %}
+{{form.as_ul}}
+<input type="submit" value="Register" />
+
+</form>
+<br />
+<br />
+
+ <a href="/accounts/login">click here to log in</a>
+
+{% endblock %}

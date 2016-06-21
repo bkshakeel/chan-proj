@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+
+
+
+<form action="/shakeel/form/" method="post">{% csrf_token %}
+    <label for="a">first operand </label>
+    <input id="a" type="text" name="a" value="">
+    <br />
+
+
+  <input id = "1" type="radio" name="sym" value="+"> add<br>
+  <input id = "2" type="radio" name="sym" value="-"> subtract<br>
+  <input id = "3" type="radio" name="sym" value="*"> multiply<br>
+  <input id = "4" type="radio" name="sym" value="/"> divide<br>
+
+  <label for="b">second operand </label>
+  <input id="b" type="text" name="b" value="">
+  <br />
+    <input type="submit" value="OK">
+</form>
+
+
+
+<br />
+<br  />
+<br  />
+
+    <div id="posts">
+        {% for post in posts %}
+            <div class="post" data-post-id="{{ post.id }}">
+
+                {{ post.html_body }}
+            </div>
+        {% endfor %}
+    </div>
+
+{% endblock %}
+
+
+{% block extra_body %}
+    <script>
+        $(function () {
+            var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+            var ws_path = ws_scheme + '://' + window.location.host + "/shakeel" ;
+            console.log("Connecting to " + ws_path);
+            var socket = new ReconnectingWebSocket(ws_path);
+
+            socket.onmessage = function(message) {
+                console.log("Got message " + message.data);
+                var data = JSON.parse(message.data);
+                var content = data.html;
+                var existing = $("div[data-post-id=" + data.id + "]");
+                if (existing.length) {
+                    existing.html(content);
+                } else {
+                    var newdiv = $("<div class='post' data-post-id='" + data.id + "'>" + content + "</div>");
+                    $("#posts").prepend(newdiv);
+                }
+            };
+
+            socket.onopen = function() { console.log("Connected to notification socket"); }
+            socket.onclose = function() { console.log("Disconnected to notification socket"); }
+        });
+
+    </script>
+{% endblock %}

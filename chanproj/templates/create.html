@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block   content %}
+
+
+<form  id="formprojform">
+  <table id="formproj">
+    <tbody>
+      {% for o in article %}
+        <tr>
+          <td>{{ o.timestamp }}</td>
+          <td>{{ o }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+    <tr>
+      <td>Say something:</td>
+      <td colspan=2>
+        {{form.as_p}}
+        <input type="submit" id="go" name="submit">Say it</input>
+      </td>
+    </tfoot>
+  </table>
+</form>
+
+
+
+  click <a href="/accounts/logout">here</a>
+
+  {% endblock %}
+
+  {% block afterbody %}
+<script >
+  $(function() {
+    // When we're using HTTPS, use WSS too.
+    var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+    var formprojsock = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/formproj" + window.location.pathname);
+
+    formprojsock.ono = function(o) {
+        var data = JSON.parse(o.data);
+        var formproj = $("#formproj")
+        var ele = $('<tr></tr>')
+
+        ele.append(
+            $("<td></td>").text(data.timestamp)
+        )
+        ele.append(
+            $("<td></td>").text(data.title)
+        )
+
+        formproj.append(ele)
+    };
+
+    $("#formprojform").on("submit", function(event) {
+        var o = {
+            title: $('#title').val(),
+            o: $('#o').val(),
+        }
+        formprojsock.send(JSON.stringify(o));
+        $("#o").val('').focus();
+        return false;
+    });
+});
+
+</script>
+{% endblock afterbody %}
